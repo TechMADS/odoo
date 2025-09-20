@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
-// import 'package:wcm/utils/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,55 +24,55 @@ class _LoginScreenState extends State<LoginScreen> {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    // try {
-    //   final result = await AuthService.login(username, password);
-    //
-    //   if (result.containsKey('token')) {
-    //     SharedPreferences prefs = await SharedPreferences.getInstance();
-    //     await prefs.setBool('isLoggedIn', true);
-    //     await prefs.setString('username', result['username'] ?? username);
-    //     await prefs.setString('dept', result['dept'] ?? '');
-    //
-    //     if (context.mounted) {
-    //       Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(builder: (context) => const HomeScreen()),
-    //       );
-    //     }
-    //   } else {
-    //     final errorMsg = result['message'] ?? 'Login failed';
-    //     if (context.mounted) {
-    //       ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(content: Text(errorMsg)),
-    //       );
-    //     }
-    //   }
-    // } catch (e) {
-    //   if(username == 'admin' && password == 'admin123') {
-    //     SharedPreferences prefs = await SharedPreferences.getInstance();
-    //     await prefs.setBool('isLoggedIn', true);
-    //     await prefs.setString('username', username);
-    //     await prefs.setString('dept', 'Admin');
-    //
-    //     if (context.mounted) {
-    //       Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(builder: (context) => const HomeScreen()),
-    //       );
-    //     }
-    //   }
-    //   if (context.mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('Error: $e')),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
+    try {
+      final result = await AuthService.login(username, password);
+
+      if (result.containsKey('token')) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('username', result['username'] ?? username);
+        await prefs.setString('dept', result['dept'] ?? '');
+
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } else {
+        final errorMsg = result['message'] ?? 'Login failed';
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMsg)));
+        }
+      }
+    } catch (e) {
+      if (username == 'admin' && password == 'admin123') {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('username', username);
+        await prefs.setString('dept', 'Admin');
+
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -94,6 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
+
                 // child: Container(
                 //   color: Colors.black.withOpacity(0.3),
                 //   child: const Center(
@@ -107,7 +108,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 //     ),
                 //   ),
                 // ),
-
               ),
             ),
 
@@ -135,8 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text(
                       "Sign In",
-                      style:
-                      TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 30),
                     TextField(
@@ -156,11 +158,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         prefixIcon: const Icon(Icons.lock),
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed:
+                              () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
                         ),
                       ),
                     ),
@@ -176,14 +182,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                            : const Text(
-                          "Login",
-                          style: TextStyle(fontSize: 18,color: Colors.white),
-                        ),
+                        child:
+                            _isLoading
+                                ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                                : const Text(
+                                  "Login",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                       ),
                     ),
                   ],

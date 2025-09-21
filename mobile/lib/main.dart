@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/Pages/Login_screen.dart';
+<<<<<<< HEAD
 import 'package:mobile/Pages/ManufacturingOrder.dart';
 import 'package:mobile/Pages/login.dart';
+=======
+// import 'package:mobile/Pages/login.dart';
+>>>>>>> df9d22eed34625c1065a27329d0ce72807c4a2b5
 
 import 'Pages/Home_Screen.dart';
 import 'Pages/Settings.dart';
@@ -23,6 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+<<<<<<< HEAD
       initialRoute: '/l',
       routes: {
         '/l':(context) => AuthPage(),
@@ -34,6 +39,10 @@ class MyApp extends StatelessWidget {
 
 
       },
+=======
+      initialRoute: '/',
+      routes: {'/': (context) => LoginScreen()},
+>>>>>>> df9d22eed34625c1065a27329d0ce72807c4a2b5
     );
   }
 }

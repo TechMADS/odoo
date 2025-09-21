@@ -1,6 +1,7 @@
 class User {
   late final String id;
-  late final String name;
+  late final String username;
+  late final String fullName;
   late final String role;
   late final String email;
   late final String password;
@@ -8,21 +9,25 @@ class User {
 
   User({
     required this.id,
-    required this.name,
+    required this.username,
+    required this.fullName,
     required this.role,
     required this.email,
     required this.password,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(id: json['_id'],
-        name: json['name'],
-        role: json['role'],
-        email: json['email'],
-        password: json['password']);
+    return User(
+      id: json['_id'],
+      username: json['name'],
+      fullName: json['full_name'],
+      role: json['role'],
+      email: json['email'],
+      password: json['password'],
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return{"name":name, "email":email, "role":role, "password":password};
+    return {"username": username, "full_name":fullName, "email": email, "role": role, "password": password};
   }
 }

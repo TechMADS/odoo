@@ -2,7 +2,7 @@
 
 A comprehensive **Manufacturing Management System** built with **Flutter** (frontend), **Node.js + Express** (backend), and **PostgreSQL** (database). This solution helps manufacturing businesses manage **Bill of Materials (BOM), Work Orders, Products, and Inventory**, all in a modern, cross-platform interface.
 
-## Demo Video
+## Demo Video (Uploading)
 Watch the demo video [here](https://drive.google.com/drive/folders/16m6N3rmCC1oXJp0uUImV088HuESv3G5r?usp=sharing).
 
 ---

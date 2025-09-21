@@ -1,13 +1,24 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:editable/editable.dart';
+import 'package:mobile/Pages/BOM.dart';
+import 'package:mobile/Pages/Stock%20ledger.dart';
+import 'package:mobile/Pages/homepage.dart';
+import 'package:mobile/Pages/work%20center.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../Components/Colors.dart';
+import '../Components/ElevationButton.dart';
 import '../utils/data_file.dart';
+import 'KanbanView.dart';
+import 'ManufacturingListView.dart';
+import 'ManufacturingOrder.dart';
+import 'Settings.dart';
+import 'Work order.dart';
 import 'admin_screen.dart';
 import 'login_screen.dart';
-import 'package:mobile/Components/Colors.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,13 +29,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // States
   String? _username;
+  final double width = 200;
+
   String? selectedSubcategory;
   int selectedIndex = 0;
 
   // CONTROLLER
   final ScrollController _scrollController = ScrollController();
   bool _extend = false;
-
 
   @override
   void initState() {
@@ -47,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      MaterialPageRoute(builder: (context) => const AuthPage()),
     );
   }
 
@@ -96,15 +108,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     log("after post");
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Saved Successfully")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Saved Successfully")));
     }
   }
 
   // FETCHING TABLE DATA
   void fetchTableData(String department, String subcategory) async {
-    final response = await http.get(Uri.parse('http://localhost:3000/data?dept=$department&sub=$subcategory'));
+    final response = await http.get(
+      Uri.parse('http://localhost:3000/data?dept=$department&sub=$subcategory'),
+    );
     if (response.statusCode == 200) {
       final List<dynamic> fetchedRows = jsonDecode(response.body);
       setState(() {
@@ -113,36 +127,80 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Widget getPage(int index) {
+    switch (index) {
+      case 0:
+        return homepage();
+      case 1:
+        return ManufacturingOrderPage();
+      case 2:
+        return WorkOrdersPage();
+      case 3:
+        return Work_Center();
+      case 4:
+        return StockLedgerPage();
+      case 5:
+        return BOMPage();
+      case 6:
+        return settings();
+
+      default:
+        return const Center(
+          child: Text('Page not found', style: TextStyle(fontSize: 24)),
+        );
+    }
+  }
+
+  Widget getnewbutton(int index) {
+    switch (index) {
+      case 0:
+        return homepagebar();
+      case 1:
+        return ManufacturingOrderPage();
+      case 2:
+        // return WorkOrderBar()
+      case 4:
+        return ledgerbar();
+      case 5:
+        // return BOM();
+
+      default:
+        return const Center(child: Text('', style: TextStyle(fontSize: 24)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final bool isAdmin = _username?.toLowerCase() == 'admin';
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text("data"),
-      // ),
-      floatingActionButton: isAdmin ? FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const AdminPage()
+      floatingActionButton:
+          isAdmin
+              ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminPage()),
+                  );
+                },
+                backgroundColor: Colors.white,
+                tooltip: "Go to Admin Page",
+                child: const Icon(Icons.admin_panel_settings),
               )
-          );
-        },
-        backgroundColor: Colors.white,
-        tooltip: "Go to Admin Page",
-        child: const Icon(Icons.admin_panel_settings),
-      ) : null,
+              : null,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Row(
             children: [
-              Container(decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [AppTheme.c2,AppTheme.c1],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter)
-              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.c2, AppTheme.c1],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
                 child: NavigationRail(
                   backgroundColor: Colors.transparent,
                   selectedIndex: selectedIndex,
@@ -161,10 +219,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 16),
-                          const CircleAvatar(
-                            radius: 32,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.person, size: 50, color: Colors.blueAccent),
+                          GestureDetector(
+                            onTap:(){Navigator.of(context).pushNamed("/p");},
+                            child: const CircleAvatar(
+                              radius: 32,
+                              backgroundColor: Colors.white,
+                              child: Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -179,28 +244,36 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                   ),
-                  trailing: IconButton(onPressed: (){
-                    setState(() {
-                      _extend = !_extend;
-                    });
-                  }, tooltip: _extend? " Tap to Close": "Tap to Expand ",
-                      icon: Icon(_extend? Icons.close_fullscreen_sharp: Icons.open_in_full, color: Colors.red,)),
+                  trailing: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _extend = !_extend;
+                      });
+                    },
+                    tooltip: _extend ? " Tap to Close" : "Tap to Expand ",
+                    icon: Icon(
+                      _extend
+                          ? Icons.close_fullscreen_sharp
+                          : Icons.open_in_full,
+                      color: Colors.red,
+                    ),
+                  ),
                   selectedIconTheme: const IconThemeData(
-                      color: Colors.white,
-                      size: 28
+                    color: Colors.white,
+                    size: 28,
                   ),
                   selectedLabelTextStyle: const TextStyle(
-                      color: Color(0xFF032140),
-                      fontWeight: FontWeight.bold
+                    color: Color(0xFF032140),
+                    fontWeight: FontWeight.bold,
                   ),
                   indicatorColor: Color(0xFF032140),
-                  unselectedIconTheme: const IconThemeData(
-                      color: Colors.white
-                  ),
+                  unselectedIconTheme: const IconThemeData(color: Colors.white),
                   unselectedLabelTextStyle: const TextStyle(
-                      color: Colors.white
+                    color: Colors.white,
                   ),
-                  destinations: List.generate( GetData.departments.length, (index) {
+                  destinations: List.generate(GetData.departments.length, (
+                    index,
+                  ) {
                     return NavigationRailDestination(
                       icon: Icon(GetData.deptIcons[index]),
                       label: Text(GetData.departments[index]),
@@ -208,205 +281,229 @@ class _HomeScreenState extends State<HomeScreen> {
                   }),
                 ),
               ),
-
               Expanded(
-                child: Column(
-                  children: [
-                    // 1. Name Of The Department
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 24, horizontal: 16
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [AppTheme.c2,AppTheme.c1]),
-                      ),
-
-                      width: double.infinity,
-
-                      alignment: Alignment.center,
-                      child:
-                      RichText(
-                        text: TextSpan(
-                          style: const TextStyle(fontSize: 36),
-                          children: [
-                            TextSpan(
-                              text: GetData.departments[selectedIndex].toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold,
-                              ),
+                child: Container(
+                  height: double.infinity,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 24,
+                            horizontal: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppTheme.c2, AppTheme.c1],
                             ),
-                            const TextSpan(
-                              text: ' DEPARTMENT',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
 
+                          width: double.infinity,
 
-                    ),
-
-                    // 2. Control Buttons
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.white70),
-                                borderRadius: BorderRadius.circular(8),
-                                gradient: LinearGradient(colors: [AppTheme.c2,AppTheme.c1])
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                  value: GetData.subcategories[GetData.departments[selectedIndex]]?.contains(selectedSubcategory) == true
-                                      ? selectedSubcategory
-                                      : null,
-                                  hint: const Text(
-                                    "Select Subcategory",
-                                    style: TextStyle(color: Colors.white),
+                          alignment: Alignment.center,
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(fontSize: 36),
+                              children: [
+                                TextSpan(
+                                  text:
+                                      GetData.departments[selectedIndex]
+                                          .toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  dropdownColor: const Color(0xFF032140),
-                                  iconEnabledColor: Colors.white,
-                                  style: const TextStyle(color: Colors.white),
-                                  items: (GetData.subcategories[GetData.departments[selectedIndex]] ?? [])
-                                      .map((sub) => DropdownMenuItem(
-                                    value: sub,
-                                    child: Text(sub),
-                                  ))
-                                      .toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedSubcategory = value;
-                                    });
-                                    fetchTableData(GetData.departments[selectedIndex], value!);
-                                  }
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Row(
-                            children: [
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: addRow,
-                                tooltip: "Add Rows",
-                                icon: const Icon(Icons.table_rows),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: (){},
-                                tooltip: "Delete Rows",
-                                icon: const Icon(Icons.delete_sweep),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: addColumn,
-                                tooltip: "Add Columns",
-                                icon: const Icon(Icons.view_column),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: () => {},
-                                tooltip: "Delete Columns",
-                                icon: const Icon(Icons.delete_forever),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: () => {},
-                                tooltip: "Undo",
-                                icon: const Icon(Icons.undo),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: () => {},
-                                tooltip: "Redo",
-                                icon: const Icon(Icons.redo),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: () => {},
-                                tooltip: "Graph",
-                                icon: const Icon(Icons.trending_up_sharp),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: () {log("message");
-                                saveData();
-                                },
-                                tooltip: "Save File",
-                                icon: const Icon(Icons.save),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton.outlined(
-                                iconSize: 20,
-                                onPressed: () => _logout(context),
-                                tooltip: "Log-Out",
-                                icon: const Icon(Icons.logout, color: Colors.red,),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 3. Data Table
-                    Expanded(
-                        child: Scrollbar(
-                          controller: _scrollController,
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            scrollDirection: Axis.horizontal,
-                            child: Container(
-                              constraints: BoxConstraints(
-                                minWidth: constraints.maxWidth,
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.blueGrey),
-                              ),
-                              child: Editable(
-                                columns: GetData.columns,
-                                rows: GetData.rows,
-                                zebraStripe: true,
-                                tdStyle: const TextStyle(fontSize: 16),
-                                showCreateButton: false,
-                                thStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.black,
                                 ),
-                                onRowSaved: (value) {
-                                  if (value is Map<String, dynamic>) {
-                                    // Try to find a matching row (basic way: assume 'metric' is unique)
-                                    int index = GetData.rows.indexWhere((row) => row['metric'] == value['metric']);
-                                    if (index != -1) {
-                                      GetData.rows[index] = value;
-                                      log("Row updated at index $index: ${GetData.rows[index]}");
-                                    }
-                                  }
-                                },
-                              ),
+                                const TextSpan(
+                                  text: ' DASHBOARD',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
                             ),
                           ),
-                        )
+                        ),
+
+                        // 2. Control Buttons
+                        getnewbutton(selectedIndex),
+                        getPage(selectedIndex),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class ResponsiveSearchField extends StatefulWidget {
+  final ValueChanged<String>? onSearch;
+  final String hintText;
+  final Duration debounceDuration;
+  final TextEditingController? controller;
+
+  const ResponsiveSearchField({
+    Key? key,
+    this.onSearch,
+    this.hintText = 'Search...',
+    this.debounceDuration = const Duration(milliseconds: 350),
+    this.controller,
+  }) : super(key: key);
+
+  @override
+  _ResponsiveSearchFieldState createState() => _ResponsiveSearchFieldState();
+}
+
+class _ResponsiveSearchFieldState extends State<ResponsiveSearchField> {
+  late final TextEditingController _controller;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.removeListener(_onTextChanged);
+    if (widget.controller == null) {
+      // only dispose if we created it
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    // immediate UI update handled by TextField; debounce for callback
+    _debounce?.cancel();
+    _debounce = Timer(widget.debounceDuration, () {
+      widget.onSearch?.call(_controller.text.trim());
+    });
+    setState(() {}); // update suffix icon (clear button)
+  }
+
+  void _clear() {
+    _controller.clear();
+    widget.onSearch?.call('');
+    setState(() {}); // update suffix icon
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Use Expanded so the field is responsive inside a Row.
+    return Expanded(
+      child: SizedBox(
+        height: 48,
+        child: Material(
+          elevation: 0,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color:
+                  Theme.of(context).inputDecorationTheme.fillColor ??
+                  Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              controller: _controller,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (value) => widget.onSearch?.call(value.trim()),
+              decoration: InputDecoration(
+                hintText: widget.hintText,
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon:
+                    _controller.text.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: _clear,
+                        )
+                        : null,
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 12,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class homepagebar extends StatelessWidget {
+  const homepagebar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            // decoration: BoxDecoration(
+            //   border: Border.all(color: Colors.white70),
+            //   borderRadius: BorderRadius.circular(8),
+            //   gradient: LinearGradient(
+            //     colors: [AppTheme.c2, AppTheme.c1],
+            //   ),
+            // ),
+            child: GradientElevatedButton(
+              text: "New",
+              onPressed: () {
+                Navigator.of(context).pushNamed("/manufacturing");
+              },
+            ),
+          ),
+          const SizedBox(width: 20),
+          ResponsiveSearchField(),
+
+          const SizedBox(width: 20),
+          Row(
+            children: [
+              IconButton.outlined(
+                iconSize: 20,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ManufacturingOrdersPage(),
+                    ),
+                  );
+                },
+                tooltip: "Order ListView",
+                icon: const Icon(Icons.table_rows),
+              ),
+              const SizedBox(width: 10),
+              IconButton.outlined(
+                iconSize: 20,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ManufacturingKanbanPage(),
+                    ),
+                  );
+                },
+                tooltip: "Order Kanban View",
+                icon: const Icon(Icons.table_rows),
+              ),
+              const SizedBox(width: 10),
+            ],
+          ),
+        ],
       ),
     );
   }

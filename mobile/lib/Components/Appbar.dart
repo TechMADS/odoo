@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/Components/IconButton.dart';
 import 'Colors.dart';
 
 
 class appbar extends StatelessWidget {
-  const appbar({super.key, required this.appbar_title });
+  const appbar({super.key, required this.appbar_title , required this.icbutton});
   final String appbar_title;
+  final IconButton icbutton;
 
   double get myAppBarHeight => 60.0;
 
@@ -15,27 +17,27 @@ class appbar extends StatelessWidget {
       backgroundColor: Colors.white,
       automaticallyImplyLeading: false,
       toolbarHeight: 60,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppTheme.c1,AppTheme.c2 // Blue
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
       title:  Container(
-        color: Colors.white,
+        color: Colors.transparent,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-
-              backgroundImage: AssetImage("assets/Logo.png"),
-              radius: 30,
-              backgroundColor: Colors.white,
-
-            ),
-            Text(appbar_title,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.black),),
+            icbutton,
+            Text(appbar_title,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
             Row(
               children: [
-                CircleAvatar(backgroundImage: AssetImage("assets/images/Logo.png"),
-                  radius: 25,
-                  backgroundColor: primaryColor,child: IconButton(onPressed: (){
-                  Navigator.of(context).pushNamed("/profile");
-                }, icon: Icon(Icons.person, color: Colors.white,)),
-                ),
+                iconButton(color: Colors.white, icon: Icons.person, route: "route")
 
               ],
             )

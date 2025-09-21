@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/Components/Colors.dart';
 
 class Elevationbutton extends StatelessWidget {
   final String name, routePage;
@@ -47,6 +48,53 @@ class Elevationbutton extends StatelessWidget {
           ],
         ),
 
+      ),
+    );
+  }
+}
+
+
+class GradientElevatedButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final List<Color> gradientColors;
+
+  const GradientElevatedButton({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+    this.gradientColors = const [AppTheme.c1,AppTheme.c2],
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+      ),
+      onPressed: onPressed,
+      child: Ink(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradientColors),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
+        ),
       ),
     );
   }

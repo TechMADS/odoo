@@ -20,12 +20,25 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM bill_of_materials ORDER BY id ASC');
+    const result = await pool.query(`
+      SELECT 
+        bom.id,
+        bom.product_id,
+        p.name AS product_name,
+        bom.raw_material_id,
+        bom.quantity_required,
+        bom.unit
+      FROM bill_of_materials bom
+      JOIN products p ON bom.product_id = p.id
+      ORDER BY bom.id ASC
+    `);
+
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 router.get('/:id', async (req, res) => {
   try {
